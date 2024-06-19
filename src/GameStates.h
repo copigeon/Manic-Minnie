@@ -1,0 +1,26 @@
+//
+// Created by copig on 23/02/2024.
+//
+
+#ifndef PLATFORMERSFML_GAMESTATES_H
+#define PLATFORMERSFML_GAMESTATES_H
+
+enum GameState
+{
+  SPLASH,
+  INTRO,
+  OPTIONS,
+  PLAYING,
+  GAME_WON,
+  GAME_LOST,
+  GAME_FINALE,
+  QUIT
+};
+
+enum MapState
+{
+  CENTRAL_CAVERN,
+  THE_COLD_ROOM
+};
+
+#endif // PLATFORMERSFML_GAMESTATES_H
