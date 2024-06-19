@@ -23,7 +23,9 @@ set(SOURCE_FILES src/main.cpp src/Game.cpp src/Game.h
         src/Platform.cpp
         src/Platform.h
         src/Audio.h
-        src/Audio.cpp)
+        src/Audio.cpp
+        src/Text.cpp
+        src/Text.h)
 add_executable(PlatformerSFML ${SOURCE_FILES})
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")

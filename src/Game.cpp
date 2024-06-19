@@ -11,8 +11,12 @@ Game::Game(sf::RenderWindow& game_window)
 {
   srand(time(NULL));
 
-  player = new Player;
+  //Audio object contains all sounds and music for game
   audio = new Audio;
+  //Text object contacts all block text elements for game
+  text = new Text(window);
+
+  player = new Player;
   gate = new GameObject;
   platform_array = new sf::RectangleShape[15];
   key_array = new GameObject[5];
@@ -39,6 +43,9 @@ Game::Game(sf::RenderWindow& game_window)
 Game::~Game()
 {
   if(audio != nullptr){delete audio; audio = nullptr;}
+  if(text != nullptr){delete text; text = nullptr;}
+
+
   if(player != nullptr){delete player; player = nullptr;}
   if(gate != nullptr){delete gate; gate = nullptr;}
   if(key_array != nullptr){delete key_array; key_array = nullptr;}
@@ -61,8 +68,6 @@ Game::~Game()
 
 bool Game::init()
 {
-  loadFonts();
-
   initMaps();
 
   buildSplash();
@@ -102,7 +107,7 @@ void Game::update(float dt)
       intro_timer_scroll -= dt;
       if(intro_timer_scroll < 0)
       {
-        intro_text.setPosition(intro_text.getPosition().x,intro_text.getPosition().y+5);
+        text->intro_text.setPosition(text->intro_text.getPosition().x,text->intro_text.getPosition().y+5);
         intro_timer_scroll = 0.2;
       }
       intro_timer -= dt;
@@ -142,7 +147,7 @@ void Game::update(float dt)
         }
         intro_timer = 1;
       }
-      if(intro_text.getPosition().y > window.getSize().y-82) {
+      if(text->intro_text.getPosition().y > window.getSize().y-82) {
         game_state = GameState::OPTIONS;
       }
       break;
@@ -364,8 +369,8 @@ void Game::update(float dt)
             player->setScore(player->getScore() + 4);
             air_bar -= 4;
             air.setSize(sf::Vector2f(air_bar, air.getGlobalBounds().height));
-            score_text.setString("Score " + std::to_string(player->getScore()));
-            score_text.setPosition(window.getSize().x-score_text.getGlobalBounds().width-20,620);
+            text->score_text.setString("Score " + std::to_string(player->getScore()));
+            text->score_text.setPosition(window.getSize().x-text->score_text.getGlobalBounds().width-20,620);
         }
         if(air_bar < 0)
         {
@@ -397,7 +402,7 @@ void Game::update(float dt)
         if (animation_clock.getElapsedTime().asSeconds() > 0.2)
         {
           background_block.setFillColor(game_over_colour[game_over_counter]);
-          game_over_text.setFillColor(game_over_colour[game_over_counter]);
+          text->game_over_text.setFillColor(game_over_colour[game_over_counter]);
           game_over_counter++;
           animation_clock.restart();
         }
@@ -405,7 +410,7 @@ void Game::update(float dt)
       else {
         if (animation_clock.getElapsedTime().asSeconds() > 0.05)
         {
-          game_over_text.setFillColor(game_over_colour[game_over_counter]);
+          text->game_over_text.setFillColor(game_over_colour[game_over_counter]);
           game_over_counter++;
           animation_clock.restart();
         }
@@ -434,27 +439,27 @@ void Game::render()
     case SPLASH:
       //std::cout << "RENDER SPLASH" << std::endl;
       window.draw(splash_background);
-      window.draw(splash_text);
+      window.draw(text->splash_text);
 
       break;
     case INTRO:
       //std::cout << "RENDER INTRO" << std::endl
-      window.draw(intro_text);
+      window.draw(text->intro_text);
       window.draw(top_bar);
       window.draw(bottom_bar);
       window.draw(left_bar);
       window.draw(right_bar);
-      window.draw(intro_text_1);
-      window.draw(intro_text_2);
+      window.draw(text->intro_text_1);
+      window.draw(text->intro_text_2);
       break;
     case PLAYING:
       defineMapSpecifics();
       //std::cout << "RENDER PLAYING" << std::endl;
       window.draw(background_block);
       window.draw(ui_block_top);
-      window.draw(ui_top_text_controls);
-      window.draw(ui_top_text_quit);
-      window.draw(ui_top_text_music);
+      window.draw(text->ui_top_text_controls);
+      window.draw(text->ui_top_text_quit);
+      window.draw(text->ui_top_text_music);
       window.draw(ui_block_bottom);
       window.draw(map_left_wall);
       window.draw(map_right_wall);
@@ -463,8 +468,8 @@ void Game::render()
       window.draw(air_green);
       window.draw(air_red);
       window.draw(air);
-      window.draw(room_name_text);
-      window.draw(air_text);
+      window.draw(text->room_name_text);
+      window.draw(text->air_text);
 
       //window.draw(platform_array[0]);
 
@@ -473,8 +478,8 @@ void Game::render()
         window.draw(platform_array[i]);
       }
 
-      window.draw(high_score_text);
-      window.draw(score_text);
+      window.draw(text->high_score_text);
+      window.draw(text->score_text);
 
       for (int i = 0; i < map_enemies; i++) {
         window.draw(*enemy_array[i].getSprite());
@@ -526,12 +531,12 @@ void Game::render()
     case OPTIONS:
       //std::cout << "RENDER OPTIONS" << std::endl;
       window.draw(options_background);
-      window.draw(options_text);
-      window.draw(options_text_1);
-      window.draw(options_text_2);
+      window.draw(text->options_text);
+      window.draw(text->options_text_1);
+      window.draw(text->options_text_2);
       window.draw(key_1);
       window.draw(key_2);
-      window.draw(options_enter_play);
+      window.draw(text->options_enter_play);
       break;
     case GAME_WON:
       //std::cout << "RENDER WON" << std::endl;
@@ -542,11 +547,11 @@ void Game::render()
       window.draw(air_green);
       window.draw(air_red);
       window.draw(air);
-      window.draw(room_name_text);
-      window.draw(air_text);
+      window.draw(text->room_name_text);
+      window.draw(text->air_text);
 
-      window.draw(high_score_text);
-      window.draw(score_text);
+      window.draw(text->high_score_text);
+      window.draw(text->score_text);
 
       window.draw(*player->getSprite());
 
@@ -565,19 +570,19 @@ void Game::render()
       window.draw(air_green);
       window.draw(air_red);
       window.draw(air);
-      window.draw(room_name_text);
-      window.draw(air_text);
+      window.draw(text->room_name_text);
+      window.draw(text->air_text);
 
       window.draw(platform_array[0]);
 
-      window.draw(high_score_text);
-      window.draw(score_text);
+      window.draw(text->high_score_text);
+      window.draw(text->score_text);
 
       window.draw(lose_boot_sprite);
       window.draw(lose_leg_rect);
       window.draw(lose_podium_sprite);
-      window.draw(game_over_text);
-      window.draw(restart_text);
+      window.draw(text->game_over_text);
+      window.draw(text->restart_text);
 
       if(lose_boot_sprite.getPosition().y+lose_boot_sprite.getGlobalBounds().height < lose_player_sprite.getPosition().y) {
         window.draw(lose_player_sprite);
@@ -590,7 +595,7 @@ void Game::render()
     case GAME_FINALE:
       //std::cout << "RENDER FINALE" << std::endl;
       window.draw(win_banner);
-      window.draw(well_done);
+      window.draw(text->well_done);
 
       //std::cout << high_scores_array[0][1];
       //std::cout << high_scores_array[0][0];
@@ -598,15 +603,15 @@ void Game::render()
 
       if(player->getScore() > stoi(high_scores_array[0][1]))
       {
-        window.draw(new_high_score_1);
-        window.draw(new_high_score_2);
-        window.draw(new_high_score_3);
-        window.draw(player_name);
+        window.draw(text->new_high_score_1);
+        window.draw(text->new_high_score_2);
+        window.draw(text->new_high_score_3);
+        window.draw(text->player_name);
       }
       else {
-        window.draw(return_to_options);
+        window.draw(text->return_to_options);
       }
-      window.draw(score_1);
+      window.draw(text->score_1);
 
       break;
   }
@@ -917,23 +922,6 @@ void Game::keyPressed(sf::Event event)
   }
 }
 
-void Game::loadFonts() {
-  //LOAD THE TITLE FONT HERE
-  if(!title_font.loadFromFile(("Data/Fonts/MANIC_MINER.ttf")))
-  {
-    std::cout << "font did not load \n";
-  }
-  //LOAD THE STANDARD FONT HERE
-  if(!font.loadFromFile(("Data/Fonts/open-sans/OpenSans-Light.ttf")))
-  {
-    std::cout << "font did not load \n";
-  }
-  if(!basic_font.loadFromFile(("Data/Fonts/zx-spectrum.ttf")))
-  {
-    std::cout << "font did not load \n";
-  }
-}
-
 void Game::resetGame() {
   initPlayer();
   player->sprite_texture_rect = sf::IntRect (0,0,8,16);
@@ -941,19 +929,16 @@ void Game::resetGame() {
   player->getSprite()->setPosition(80, platform_array[0].getPosition().y-player->getSprite()->getGlobalBounds().height);
 
   player->setScore(0);
-  score_text.setString("Score " + std::to_string(player->getScore()));
+  text->score_text.setString("Score " + std::to_string(player->getScore()));
 
   getHighScores(high_scores_array);
   sortHighScores(high_scores_array);
-  high_score_text.setString("High Score: " + high_scores_array[9][1]);
+  text->high_score_text.setString("High Score: " + high_scores_array[9][1]);
 
   player->setLives(3);
   current_map = 0;
   mapSequencer();
   buildLose();
-
-
-
 }
 
 void Game::resetPlayer() {
@@ -996,16 +981,6 @@ void Game::buildSplash() {
   }
   splash_background.setTexture(splash_background_texture);
   splash_background.setPosition(sf::Vector2f((window.getSize().x/2)-(splash_background_texture.getSize().x/2),(window.getSize().y/2)-(splash_background_texture.getSize().y/2)-50));
-
-  // CREATE THE MENU TEXT HERE
-  splash_text.setString("Press [ Enter ] to Start!");
-  splash_text.setFont(font);
-  splash_text.setLetterSpacing(2);
-  splash_text.setCharacterSize(25);
-  splash_text.setOutlineThickness(1);
-  splash_text.setOutlineColor(sf::Color::White);
-  splash_text.setFillColor((sf::Color::White));
-  splash_text.setPosition((((float)window.getSize().x - splash_text.getGlobalBounds().width)/2),window.getSize().y - 150);
 }
 
 void Game::buildIntro() {
@@ -1040,38 +1015,6 @@ void Game::buildIntro() {
   right_bar.setPosition((float)window.getSize().x-right_bar.getSize().x,0);
   right_bar.setTextureRect(sf::IntRect(0, 0, 50, window.getSize().y));
   right_bar.setTexture(&bar_texture);
-
-  // CREATE THE OPTIONS TEXT HERE
-  intro_text.setString(
-    "Good Luck!"
-    "\n\n\n\n"
-    "Watch out for deadly obstructions, crazed\n machinery and animals who dwell within...\n"
-    "\n"
-    "Safely guide Minnie through each room,\n collecting keys to progress into the mines...\n"
-    "\n\n"
-    "the bad news is, it's still active and\n doesn't take kindly to intruders...\n"
-    "\n"
-    "The good news is, the mine machinery has been\n piling up wealth which is there for the taking;\n"
-    "\n"
-    "Minnie has discovered an automated, abandoned\n for untold centuries, mine in Surbiton.\n"
-    );
-  intro_text.setFont(title_font);
-  intro_text.setCharacterSize(15);
-  intro_text.setColor(sf::Color::Black);
-  intro_text.setPosition((((float)window.getSize().x - intro_text.getGlobalBounds().width)/2),(0-(intro_text.getGlobalBounds().height-92)));
-
-  intro_text_1.setString("Program: Manic Minnie \xa9 Em Tarr 23079062");
-  intro_text_1.setFont(font);
-  intro_text_1.setCharacterSize(20);
-  intro_text_1.setColor(sf::Color::Black);
-  intro_text_1.setPosition(60,82-intro_text_1.getGlobalBounds().height);
-
-  intro_text_2.setString("PRESS [ ENTER ] TO SKIP");
-  intro_text_2.setFont(font);
-  intro_text_2.setCharacterSize(20);
-  intro_text_2.setColor(sf::Color::Black);
-  intro_text_2.setPosition(window.getSize().x-(intro_text_2.getGlobalBounds().width+92),window.getSize().y-82);
-
 }
 
 void Game::buildPlaying() {
@@ -1099,36 +1042,9 @@ void Game::buildPlaying() {
     life_sprite[j].setPosition(life_sprite[j-1].getPosition().x+32, 660);
   }
 
-  ui_top_text_quit.setString("PRESS [ ESC ] FOR OPTIONS MENU");
-  ui_top_text_quit.setFont(title_font);
-  ui_top_text_quit.setLetterSpacing(2);
-  ui_top_text_quit.setCharacterSize(15);
-  ui_top_text_quit.setFillColor((sf::Color::Black));
-  ui_top_text_quit.setPosition((((float)window.getSize().x - ui_top_text_quit.getGlobalBounds().width)/2),25);
-
-  ui_top_text_controls.setString("[ A to move LEFT ] [ D to move RIGHT ] [ SPACE to JUMP ]");
-  ui_top_text_controls.setFont(title_font);
-  ui_top_text_controls.setLetterSpacing(2);
-  ui_top_text_controls.setCharacterSize(15);
-  ui_top_text_controls.setFillColor((sf::Color::Black));
-  ui_top_text_controls.setPosition((((float)window.getSize().x - ui_top_text_controls.getGlobalBounds().width)/2),55);
-
-  ui_top_text_music.setString("PRESS [ N and M ] TO DISABLE and ENABLE MUSIC ");
-  ui_top_text_music.setFont(title_font);
-  ui_top_text_music.setLetterSpacing(2);
-  ui_top_text_music.setCharacterSize(15);
-  ui_top_text_music.setFillColor((sf::Color::Black));
-  ui_top_text_music.setPosition((((float)window.getSize().x - ui_top_text_music.getGlobalBounds().width)/2),85);
-
   room_name_bar.setSize(sf::Vector2f(window.getSize().x,25 ));
   room_name_bar.setFillColor(sf::Color(192,192,0,255));
   room_name_bar.setPosition(0,550);
-
-  room_name_text.setString("THE ROOM NAME HERE");
-  room_name_text.setFont(title_font);
-  room_name_text.setCharacterSize(15);
-  room_name_text.setColor(sf::Color::Black);
-  room_name_text.setPosition((window.getSize().x-room_name_text.getGlobalBounds().width)/2,555);
 
   air_green.setSize(sf::Vector2f(window.getSize().x,25 ));
   air_green.setFillColor(sf::Color::Green);
@@ -1141,12 +1057,6 @@ void Game::buildPlaying() {
   air.setSize(sf::Vector2f(air_bar,15 ));
   air.setFillColor(sf::Color::White);
   air.setPosition(100,580);
-
-  air_text.setString("AIR");
-  air_text.setFont(title_font);
-  air_text.setCharacterSize(20);
-  air_text.setColor(sf::Color::White);
-  air_text.setPosition(10,578);
 
   map_left_wall.setSize(sf::Vector2f (25,room_name_bar.getPosition().y));
   map_left_wall.setPosition(0,0);
@@ -1171,20 +1081,9 @@ void Game::buildPlaying() {
 
   getHighScores(high_scores_array);
   sortHighScores(high_scores_array);
-  high_score_text.setString("High Score: " + high_scores_array[9][1]);
-  high_score_text.setFont(basic_font);
-  high_score_text.setLetterSpacing(2);
-  high_score_text.setCharacterSize(16);
-  high_score_text.setFillColor((sf::Color::Yellow));
-  high_score_text.setPosition(20,620);
+  text->high_score_text.setString("High Score: " + high_scores_array[9][1]);
 
-  score_text.setString("Score " + std::to_string(player->getScore()));
-  score_text.setFont(basic_font);
-  score_text.setLetterSpacing(2);
-  score_text.setCharacterSize(16);
-  score_text.setFillColor((sf::Color::Yellow));
-  score_text.setPosition(window.getSize().x-score_text.getGlobalBounds().width-20,620);
-
+  text->score_text.setString("Score " + std::to_string(player->getScore()));
 }
 
 void Game::buildOptions() {
@@ -1195,44 +1094,6 @@ void Game::buildOptions() {
   options_background_texture.setRepeated(true);
   options_background.setTexture(options_background_texture);
   options_background.setScale(1.5,1.5);
-
-  // CREATE THE OPTIONS TEXT HERE
-  options_text.setString("MANIC MINNIE");
-  options_text.setFont(title_font);
-  options_text.setLetterSpacing(2);
-  options_text.setCharacterSize(30);
-  options_text.setOutlineThickness(0);
-  options_text.setOutlineColor(sf::Color::White);
-  options_text.setFillColor((sf::Color::White));
-  options_text.setPosition((((float)window.getSize().x - options_text.getGlobalBounds().width)/2),280);
-
-  options_text_1.setString("starring:");
-  options_text_1.setFont(title_font);
-  options_text_1.setLetterSpacing(2);
-  options_text_1.setCharacterSize(15);
-  options_text_1.setOutlineThickness(0);
-  options_text_1.setOutlineColor(sf::Color::White);
-  options_text_1.setFillColor((sf::Color::White));
-  options_text_1.setPosition((((float)window.getSize().x - options_text_1.getGlobalBounds().width)/2),325);
-
-  options_text_2.setString("MINNIE } MINER");
-  options_text_2.setFont(title_font);
-  options_text_2.setLetterSpacing(2);
-  options_text_2.setCharacterSize(25);
-  options_text_2.setOutlineThickness(0);
-  options_text_2.setOutlineColor(sf::Color::White);
-  options_text_2.setFillColor((sf::Color::White));
-  options_text_2.setPosition((((float)window.getSize().x - options_text_2.getGlobalBounds().width)/2),350);
-
-  options_enter_play.setString("Press [ENTER] to play!");
-  options_enter_play.setFont(font);
-  options_enter_play.setLetterSpacing(2);
-  options_enter_play.setCharacterSize(30);
-  options_enter_play.setOutlineThickness(0);
-  options_enter_play.setOutlineColor(sf::Color::White);
-  options_enter_play.setFillColor((sf::Color::White));
-  options_enter_play.setPosition((((float)window.getSize().x - options_enter_play.getGlobalBounds().width)/2),450);
-
 }
 
 void Game::buildWin() {
@@ -1269,19 +1130,6 @@ void Game::buildLose() {
   lose_player_sprite.setScale(2.5, 2.5);
   lose_player_sprite.setPosition(window.getSize().x/2-(lose_player_sprite.getGlobalBounds().width/2), lose_podium_sprite.getPosition().y-lose_player_sprite.getGlobalBounds().height);
 
-  game_over_text.setString("GAME        OVER");
-  game_over_text.setFont(title_font);
-  game_over_text.setLetterSpacing(4);
-  game_over_text.setCharacterSize(25);
-  game_over_text.setFillColor((sf::Color::White));
-  game_over_text.setPosition((((float)window.getSize().x - game_over_text.getGlobalBounds().width)/2),250);
-
-  restart_text.setString("PRESS [ ENTER ] TO PLAY AGAIN OR [ ESC ] FOR OPTIONS MENU");
-  restart_text.setFont(title_font);
-  restart_text.setLetterSpacing(2);
-  restart_text.setCharacterSize(15);
-  restart_text.setFillColor((sf::Color::White));
-  restart_text.setPosition((((float)window.getSize().x - restart_text.getGlobalBounds().width)/2),(float)window.getSize().y-50);
 }
 
 void Game::buildMenuSong() {
@@ -1295,8 +1143,6 @@ void Game::buildMenuSong() {
 
 }
 void Game::buildMapCavern() {
-  room_name_text.setString("Central Cavern");
-  room_name_text.setPosition(((float)window.getSize().x-room_name_text.getGlobalBounds().width)/2,555);
 
   player->setKeys(0);
   air_bar = 800;
@@ -1543,8 +1389,6 @@ void Game::buildMapCavern() {
 }
 void Game::buildMapCold() {
 
-  room_name_text.setString("The Cold Room");
-  room_name_text.setPosition(((float)window.getSize().x-room_name_text.getGlobalBounds().width)/2,555);
   background_block.setFillColor(sf::Color::Blue);
 
   player->setKeys(0);
@@ -2038,12 +1882,7 @@ void Game::buildFinale() {
   }
 
   player_name_entry = std::string(high_score_entry_alphabet[player_name_position_1] + high_score_entry_alphabet[player_name_position_2] + high_score_entry_alphabet[player_name_position_3]);
-  player_name.setString(player_name_entry);
-  player_name.setFont(font);
-  player_name.setLetterSpacing(4);
-  player_name.setCharacterSize(25);
-  player_name.setFillColor((sf::Color::White));
-  player_name.setPosition((((float)window.getSize().x - player_name.getGlobalBounds().width)/2),360);
+  text->player_name.setString(player_name_entry);
 
   if(!win_banner_texture.loadFromFile("Data/Images/win_banner.png")) {
         std::cout << "cavern_room_wall_texture texture did not load\n";
@@ -2055,41 +1894,6 @@ void Game::buildFinale() {
   win_banner.setScale(3.75,3.75);
   win_banner.setTextureRect(sf::IntRect(0, 0, window.getSize().x, 300));
   win_banner.setTexture(&win_banner_texture);
-
-  well_done.setString("You helped Minnie find her way home!");
-  well_done.setFont(title_font);
-  well_done.setLetterSpacing(4);
-  well_done.setCharacterSize(20);
-  well_done.setFillColor((sf::Color::White));
-  well_done.setPosition((((float)window.getSize().x - well_done.getGlobalBounds().width)/2),250);
-
-  new_high_score_1.setString("You have a new high score!");
-  new_high_score_1.setFont(font);
-  new_high_score_1.setLetterSpacing(4);
-  new_high_score_1.setCharacterSize(16);
-  new_high_score_1.setFillColor((sf::Color::White));
-  new_high_score_1.setPosition((((float)window.getSize().x - new_high_score_1.getGlobalBounds().width)/2),280);
-
-  new_high_score_2.setString("Enter your initials using the [UP][DOWN][LEFT][RIGHT] arrow keys.");
-  new_high_score_2.setFont(font);
-  new_high_score_2.setLetterSpacing(4);
-  new_high_score_2.setCharacterSize(16);
-  new_high_score_2.setFillColor((sf::Color::White));
-  new_high_score_2.setPosition((((float)window.getSize().x - new_high_score_2.getGlobalBounds().width)/2),305);
-
-  new_high_score_3.setString("Hit [ENTER] to record your victory on the leader board!");
-  new_high_score_3.setFont(font);
-  new_high_score_3.setLetterSpacing(4);
-  new_high_score_3.setCharacterSize(16);
-  new_high_score_3.setFillColor((sf::Color::White));
-  new_high_score_3.setPosition((((float)window.getSize().x - new_high_score_3.getGlobalBounds().width)/2),330);
-
-  return_to_options.setString("Press [ENTER] to return to the [OPTIONS] menu!");
-  return_to_options.setFont(font);
-  return_to_options.setLetterSpacing(4);
-  return_to_options.setCharacterSize(20);
-  return_to_options.setFillColor((sf::Color::White));
-  return_to_options.setPosition((((float)window.getSize().x - return_to_options.getGlobalBounds().width)/2),290);
 
   std::string score_chart;
   score_chart = "Name:   Score:\n" +
@@ -2103,12 +1907,8 @@ void Game::buildFinale() {
                 high_scores_array[2][0] + ":   " + high_scores_array[2][1] + "\n" +
                 high_scores_array[1][0] + ":   " + high_scores_array[1][1] + "\n" +
                 high_scores_array[0][0] + ":   " + high_scores_array[0][1] + "\n";
-  score_1.setString(score_chart);
-  score_1.setFont(font);
-  score_1.setLetterSpacing(4);
-  score_1.setCharacterSize(20);
-  score_1.setFillColor((sf::Color::White));
-  score_1.setPosition((((float)window.getSize().x - score_1.getGlobalBounds().width)/2),400);
+  text->score_1.setString(score_chart);
+  text->score_1.setPosition((((float)window.getSize().x - text->score_1.getGlobalBounds().width)/2),400);
 }
 
 void Game::getHighScores(std::string (&high_scores_array)[10][10]) {

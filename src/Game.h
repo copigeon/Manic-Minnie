@@ -11,6 +11,7 @@
 #include "Map.h"
 #include "Platform.h"
 #include "Audio.h"
+#include "Text.h"
 
 class Game
 {
@@ -32,6 +33,7 @@ class Game
   void initPlayer();
 
   Audio *audio = nullptr;
+  Text *text = nullptr;
   Player *player = nullptr;
   GameObject *gate = nullptr;
   GameObject *key_array = nullptr;
@@ -137,15 +139,9 @@ class Game
   GameState game_state = GameState::SPLASH;
   MapState mapstate = MapState::CENTRAL_CAVERN;
 
-  //FONTS
-  sf::Font title_font;
-  sf::Font basic_font;
-  sf::Font font;
-
   // SPLASH
   sf::Sprite splash_background;
   sf::Texture splash_background_texture;
-  sf::Text splash_text;
 
   // INTRO
   sf::RectangleShape left_bar;
@@ -155,20 +151,12 @@ class Game
   sf::Texture top_bar_texture;
   sf::RectangleShape bottom_bar;
   sf::Texture bottom_bar_texture;
-  sf::Text intro_text;
-  sf::Text intro_text_1;
-  sf::Text intro_text_2;
 
   //PLAYING
   sf::RectangleShape room_name_bar;
   sf::RectangleShape air_red;
   sf::RectangleShape air_green;
   sf::RectangleShape air;
-  sf::Text room_name_text;
-  sf::Text air_text;
-  sf::Text ui_top_text_quit;
-  sf::Text ui_top_text_controls;
-  sf::Text ui_top_text_music;
   float air_bar = 800;
   int key_frame = 0;
   sf::Color key_colours[6] = {sf::Color::Red, sf::Color::Blue,sf::Color::Yellow,sf::Color::Green, sf::Color::Magenta, sf::Color::Cyan};
@@ -181,9 +169,6 @@ class Game
   sf::RectangleShape ui_block_top;
   sf::Texture wall_texture;
 
-  sf::Text high_score_text;
-  sf::Text score_text;
-
   //ROOMS
   sf::Texture platform_wall_texture;
   sf::Texture elevator_texture_1;
@@ -192,30 +177,10 @@ class Game
   //OPTIONS
   sf::Sprite options_background;
   sf::Texture options_background_texture;
-  sf::Text options_text;
-  sf::Text options_text_1;
-  sf::Text options_text_2;
   sf::RectangleShape key_1;
   sf::RectangleShape key_2;
-  sf::Text options_enter_play;
 
   //HIGH SCORE STUFF
-  sf::Text well_done;
-  sf::Text player_name;
-  sf::Text new_high_score_1;
-  sf::Text new_high_score_2;
-  sf::Text new_high_score_3;
-  sf::Text return_to_options;
-  sf::Text score_1;
-  sf::Text score_2;
-  sf::Text score_3;
-  sf::Text score_4;
-  sf::Text score_5;
-  sf::Text score_6;
-  sf::Text score_7;
-  sf::Text score_8;
-  sf::Text score_9;
-  sf::Text score_10;
   sf::RectangleShape win_banner;
   sf::Texture win_banner_texture;
 
@@ -229,8 +194,6 @@ class Game
   sf::RectangleShape lose_leg_rect;
   sf::Texture lose_leg_texture;
   sf::Sprite lose_podium_sprite;
-  sf::Text game_over_text;
-  sf::Text restart_text;
   sf::RectangleShape background_block;
 
 };

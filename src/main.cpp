@@ -13,9 +13,7 @@ int main()
   window.setFramerateLimit(60);
 
   //initialise an instance of the game class
-  std::cout << "test1" << std::endl;
   Game game(window);
-
 
   //run the init function of the game class and check it all initialises ok
   if (!game.init())
