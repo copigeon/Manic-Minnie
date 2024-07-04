@@ -28,8 +28,24 @@ class Map {
   void setColourGreen(int colourGreen);
   int getDecayPlatforms() const;
   void setDecayPlatforms(int decayPlatforms);
+  const std::string& getName() const;
+  void setName(const std::string& name);
+  const std::string& getColour() const;
+  void setColour(const std::string& colour);
+  const std::string& getEnemiesContainer() const;
+  void setEnemiesContainer(const std::string& enemiesContainer);
+  const std::string& getHazardsContainer() const;
+  void setHazardsContainer(const std::string& hazardsContainer);
+  const std::string& getKeysContainer() const;
+  void setKeysContainer(const std::string& keysContainer);
+  const std::string& getPlatformsContainer() const;
+  void setPlatformsContainer(const std::string& platformsContainer);
+  const std::string& getGateContainer() const;
+  void setGateContainer(const std::string& gateContainer);
 
  private:
+  std::string name = "holder map name";
+  std::string colour = "black";
   int enemies = 0;
   int hazards = 0;
   int keys = 0;
@@ -38,6 +54,11 @@ class Map {
   int colour_red = 0;
   int colour_green = 0;
   int colour_blue = 0;
+  std::string enemies_container = "holder";
+  std::string hazards_container = "holder";
+  std::string keys_container = "holder";
+  std::string platforms_container = "holder";
+  std::string gate_container = "holder";
 
 };
 

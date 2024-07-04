@@ -74,6 +74,7 @@ class Game
   //create map variable stores
   Map *map_central_cavern = nullptr;
   Map *map_the_cold_room = nullptr;
+  Map *map_container = nullptr;
   void initMaps();
 
   //BUILD STATE SCREENS
@@ -84,6 +85,7 @@ class Game
   void buildWin();
   void buildLose();
   void buildFinale();
+  void buildMap();
 
   //HIGH SCORE STUFF
   void getHighScores(std::string (&high_scores_array)[10][10]);
@@ -103,8 +105,7 @@ class Game
   //BUILD MAPS
   void buildMapCavern();
   void buildMapCold();
-
-  void buildSounds();
+  void buildMapTest();
   void buildMenuSong();
   int song[3][69] = {16,20,22,7,26,7,24,26,7,16,20,22,8,26,7,24,8,15,18,23,8,26,8,24,8,15,18,23,7,26,7,24,7,16,20,22,24,11,27,11,26,11,16,20,22,24,13,28,13,26,18,20,13,23,13,21,22,7,26,7,24,20,18,23,22,7,0,16,7,
                       33,33,33,11,27,11,33,33,11,33,33,33,11,27,10,26,11,33,33,33,11,28,11,26,11,33,33,33,11,28,11,26,11,33,33,33,33,16,28,16,27,16,33,33,33,33,16,33,16,28,33,33,23,33,23,33,33,26,33,26,33,33,33,33,33,16,16,33,161,
@@ -125,8 +126,10 @@ class Game
   bool background_flag = true;
 
   // map_variable_generics
+  std::string map_name = "holder map name";
   int map_enemies = 0;
   int map_keys = 0;
+  std::string map_colour = "black";
   int map_platforms = 0;
   int map_decay = 0;
   int map_hazards = 0;
