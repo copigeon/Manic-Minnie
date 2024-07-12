@@ -143,3 +143,43 @@ bool GameObject::isOnPlatform(GameObject& player)
 {
 
 }
+int GameObject::getDecayTimer() const
+{
+  return decay_timer;
+}
+void GameObject::setDecayTimer(int decayTimer)
+{
+  decay_timer = decayTimer;
+}
+const sf::Texture& GameObject::getTexture() const
+{
+  return texture;
+}
+void GameObject::setTexture(const sf::Texture& texture)
+{
+  GameObject::texture = texture;
+}
+const sf::Vector2f& GameObject::getSize() const
+{
+  return size;
+}
+void GameObject::setSize(const sf::Vector2f& size)
+{
+  GameObject::size = size;
+}
+const std::string& GameObject::getType() const
+{
+  return type;
+}
+void GameObject::setType(const std::string& type)
+{
+  GameObject::type = type;
+}
+const sf::Color& GameObject::getFill() const
+{
+  return fill;
+}
+void GameObject::setFill(const sf::Color& fill)
+{
+  GameObject::fill = fill;
+}

@@ -39,6 +39,9 @@ class Game
   GameObject *key_array = nullptr;
   GameObject *enemy_array = nullptr;
   GameObject *hazards_array = nullptr;
+
+  GameObject *map_objects_array = nullptr;
+
   Platform *platform_1 = nullptr;
   Platform *platform_2 = nullptr;
   Platform *platform_3 = nullptr;

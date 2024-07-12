@@ -22,6 +22,7 @@ Game::Game(sf::RenderWindow& game_window)
   key_array = new GameObject[5];
   enemy_array = new GameObject[2];
   hazards_array = new GameObject[10];
+  map_objects_array = new GameObject[50];
 
   //decay playforms
   platform_1 = new Platform[10];
@@ -66,6 +67,9 @@ Game::~Game()
   if(map_central_cavern != nullptr){delete map_central_cavern; map_central_cavern = nullptr;}
   if(map_the_cold_room != nullptr){delete map_the_cold_room; map_the_cold_room = nullptr;}
   if(map_container != nullptr){delete map_container; map_container = nullptr;}
+
+  if(map_objects_array != nullptr){delete map_objects_array; map_objects_array = nullptr;}
+
 }
 
 bool Game::init()
@@ -1392,9 +1396,6 @@ void Game::buildMapCavern() {
 }
 
 void Game::buildMapTest() {
-  std::string file_name;
-  file_name = "Data/map.txt";
-  std::fstream ifs(file_name);
 
   // map needs to store:
 /*
@@ -1407,7 +1408,7 @@ void Game::buildMapTest() {
   Data/Images/hazard_sprites.png;-    24;0;8;8;-      2.5;2.5;-   400;200;-   sf::Color::Cyan;-       *;-,     *;-         *;-        *;-         *;-,
   Data/Images/gate_sprites.png;-      0;0;16;16;-     2.5;2.5;-   500;500;-   yellow-true;-           *;-,     *;-         *;-        *;-         *;-,
  */
-
+/*
   if(ifs.is_open()) {
     int i = 0;
     std::string line;
@@ -1447,163 +1448,417 @@ void Game::buildMapTest() {
       i++;
     }
   }
+  */
 
-  std::string obj_delimiter = ",";
-  std::string var_delimiter = "-";
-  std::string val_delimiter = ";";
-  size_t pos_obj = 0;
-  std::string obj_output;
-  int obj_counter = 0;
-  //denotes which object in the array
-  std::string line = map_container->getEnemiesContainer();
-  while ((pos_obj = line.find(obj_delimiter)) != std::string::npos)
+  std::string file_name;
+  file_name = "Data/map.txt";
+  std::fstream ifs1(file_name);
+  int number_of_lines = 0;
+  if(ifs1.is_open())
+  {
+    int i = 0;
+    std::string line;
+    while (std::getline(ifs1, line))
     {
-      //split the object lines these are either each key, platform or similar stored and denoted by a comma
-      obj_output = line.substr(0, pos_obj);
-      //std::cout << "This is the object: " << obj_output << std::endl;
-      std::string var_output;
-      size_t pos_var= 0;
-      int var_counter = 0;
-      while ((pos_var = obj_output.find(var_delimiter)) != std::string::npos)
+      number_of_lines ++;
+    }
+  }
+  std::cout << "The number of lines is: " << number_of_lines;
+
+  std::fstream ifs(file_name);
+  if(ifs.is_open())
+  {
+    int i = 0;
+    std::string line;
+    while (std::getline(ifs, line))
+    {
+      std::string obj_delimiter = ",";
+      std::string var_delimiter = "-";
+      std::string val_delimiter = ";";
+      size_t pos_obj            = 0;
+      std::string obj_output;
+      int obj_counter = 0;
+      // denotes which object in the array
+      while ((pos_obj = line.find(obj_delimiter)) != std::string::npos)
+      {
+        // split the object lines these are either each key, platform or similar stored and denoted by a comma
+        obj_output = line.substr(0, pos_obj);
+        // std::cout << "This is the object: " << obj_output << std::endl;
+        std::string var_output;
+        size_t pos_var  = 0;
+        int var_counter = 0;
+        while ((pos_var = obj_output.find(var_delimiter)) != std::string::npos)
         {
           // split down the variables within these object lines
           var_output = obj_output.substr(0, pos_var);
-          //std::cout << "This is the var: " << var_counter  << ": " << var_output << std::endl;
+          // std::cout << "This is the var: " << var_counter  << ": " << var_output << std::endl;
           std::string val_output;
           size_t pos_val = 0;
-          //denotes which var
+          // denotes which var
 
-          int texture_rect_counter = 0;
-          int scale_counter = 0;
-          int position_counter = 0;
-          int movement_counter = 0;
+          int texture_rect_counter   = 0;
+          int scale_counter          = 0;
+          int position_counter       = 0;
+          int movement_counter       = 0;
           int move_direction_counter = 0;
+          int size_counter           = 0;
 
-
-          while ((pos_val = var_output.find(val_delimiter)) != std::string::npos)
-            {
+          while ((pos_val = var_output.find(val_delimiter)) !=
+                 std::string::npos)
+          {
               val_output = var_output.substr(0, pos_val);
-              //std::cout << "This is the value: " << val_output << std::endl;
+              // std::cout << "This is the value: " << val_output << std::endl;
               var_output.erase(0, pos_val + val_delimiter.length());
               // create the object here - first enemy created at 0 in array
-              switch (var_counter)
+              //  0texture,1texturerect,2scale,3position,4fill,5speed,6movelimits,7movedir,8size,9type
+              if (val_output != "*")
               {
-                case 0:
-                  // single value
-                  std::cout << "This is the texture: " << val_output << std::endl;
-                  enemy_array[obj_counter].initSprite(enemy_array[obj_counter].texture,val_output);
-                    /*
-                  // USING X AND Y in get movement limits to store the two EXTENTS of movement
-                  enemy_array[0].setMovementLimits(sf::Vector2f (380, map_right_wall.getPosition().x));
-                  enemy_array[0].setMoveDirection(sf::Vector2f (1,0));
-                    */
-
-                break;
-                case 1:
-                  // 4 values
-                  std::cout << "This is the texture rect: " << val_output << std::endl;
-                  switch (texture_rect_counter)
-                  {
-                    case 0:
-                      enemy_array[obj_counter].sprite_texture_rect.left = stoi(val_output);
+                switch (var_counter)
+                {
+                  case 0:
+                    // single value
+                    std::cout << "This is the texture: " << val_output
+                              << std::endl;
+                    map_objects_array[obj_counter].initSprite(
+                      map_objects_array[obj_counter].texture, val_output);
                     break;
-                    case 1:
-                      enemy_array[obj_counter].sprite_texture_rect.top = stoi(val_output);
-                    break;
-                    case 2:
-                      enemy_array[obj_counter].sprite_texture_rect.width = stoi(val_output);
-                    break;
-                    case 3:
-                      enemy_array[obj_counter].sprite_texture_rect.height = stoi(val_output);
-                    break;
-                  }
-                  texture_rect_counter ++;
-                break;
-                case 2:
-                  // 2 values
-                  std::cout << "This is the scale: " << val_output << std::endl;
-                  switch (scale_counter)
-                  {
-                    case 0:
-                      enemy_array[obj_counter].getSprite()->setScale(stof(val_output),enemy_array[obj_counter].getSprite()->getScale().y);
-                    break;
-                    case 1:
-                      enemy_array[obj_counter].getSprite()->setScale(enemy_array[obj_counter].getSprite()->getScale().x,stof(val_output));
-                    break;
-                  }
-                  scale_counter ++;
-                break;
-                case 3:
-                  // 2 values
-                  std::cout << "This is the position: " << val_output << std::endl;
-                  switch (position_counter)
-                  {
-                    case 0:
-                      enemy_array[obj_counter].getSprite()->setPosition(stof(val_output),enemy_array[obj_counter].getSprite()->getPosition().y);
-                    break;
-                    case 1:
-                      enemy_array[obj_counter].getSprite()->setPosition(enemy_array[obj_counter].getSprite()->getPosition().x,stof(val_output));
-                    break;
-                  }
-                  position_counter ++;
-                break;
-                case 4:
-                  // single value
-                  std::cout << "This is the fill: " << val_output << std::endl;
-                  break;
-                case 5:
-                  // single value
-                  std::cout << "This is the speed: " << val_output << std::endl;
-                  enemy_array[obj_counter].setSpeed(stoi(val_output));
-                break;
-                case 6:
-                  // 2 values
-                  std::cout << "This is the movement limits: " << val_output << std::endl;
-                  switch (movement_counter)
-                  {
+                  case 1:
+                    // 4 values
+                    std::cout << "This is the texture rect: " << val_output
+                              << std::endl;
+                    switch (texture_rect_counter)
+                    {
                       case 0:
-                      enemy_array[obj_counter].setMovementLimits(sf::Vector2f (stof(val_output), enemy_array[obj_counter].getMovementLimits().y));
-                      break;
+                        map_objects_array[obj_counter].sprite_texture_rect.left =
+                          stoi(val_output);
+                        break;
                       case 1:
-                      enemy_array[obj_counter].setMovementLimits(sf::Vector2f (enemy_array[obj_counter].getMovementLimits().x,stof(val_output)));
-                      break;
-                  }
-                  movement_counter ++;
-                break;
-                case 7:
-                  // 2 values
-                  std::cout << "This is the movement direction: " << val_output << std::endl;
-                  switch (move_direction_counter)
-                  {
+                        map_objects_array[obj_counter].sprite_texture_rect.top =
+                          stoi(val_output);
+                        break;
+                      case 2:
+                        map_objects_array[obj_counter].sprite_texture_rect.width =
+                          stoi(val_output);
+                        break;
+                      case 3:
+                        map_objects_array[obj_counter].sprite_texture_rect.height =
+                          stoi(val_output);
+                        break;
+                    }
+                    texture_rect_counter++;
+                    break;
+                  case 2:
+                    // 2 values
+                    std::cout << "This is the scale: " << val_output
+                              << std::endl;
+                    switch (scale_counter)
+                    {
                       case 0:
-                      enemy_array[obj_counter].setMoveDirection(sf::Vector2f (stof(val_output), enemy_array[obj_counter].getMoveDirection().y));
-                      break;
+                        map_objects_array[obj_counter].getSprite()->setScale(
+                          stof(val_output),
+                          map_objects_array[obj_counter].getSprite()->getScale().y);
+                        break;
                       case 1:
-                      enemy_array[obj_counter].setMoveDirection(sf::Vector2f (enemy_array[obj_counter].getMoveDirection().x,stof(val_output)));
-                      break;
-                  }
-                  move_direction_counter ++;
-                break;
-                case 8:
-                  // single value
-                  std::cout << "This is the fill: " << val_output << std::endl;
-                break;
-                case 9:
-                  // single value
-                  std::cout << "This is the fill: " << val_output << std::endl;
-                break;
+                        map_objects_array[obj_counter].getSprite()->setScale(
+                          map_objects_array[obj_counter].getSprite()->getScale().x,
+                          stof(val_output));
+                        break;
+                    }
+                    scale_counter++;
+                    break;
+                  case 3:
+                    // 2 values
+                    std::cout << "This is the position: " << val_output
+                              << std::endl;
+                    switch (position_counter)
+                    {
+                      case 0:
+                        map_objects_array[obj_counter].getSprite()->setPosition(
+                          stof(val_output),
+                          map_objects_array[obj_counter].getSprite()->getPosition().y);
+                        break;
+                      case 1:
+                        map_objects_array[obj_counter].getSprite()->setPosition(
+                          map_objects_array[obj_counter].getSprite()->getPosition().x,
+                          stof(val_output));
+                        break;
+                    }
+                    position_counter++;
+                    break;
+                  case 4:
+                    // single value
+                    std::cout << "This is the fill: " << val_output
+                              << std::endl;
+                    map_objects_array[obj_counter].setFill(val_output);
+                    break;
+                  case 5:
+                    // single value
+                    std::cout << "This is the speed: " << val_output
+                              << std::endl;
+                    map_objects_array[obj_counter].setSpeed(stoi(val_output));
+                    break;
+                  case 6:
+                    // 2 values
+                    std::cout << "This is the movement limits: " << val_output
+                              << std::endl;
+                    switch (movement_counter)
+                    {
+                      case 0:
+                        map_objects_array[obj_counter].setMovementLimits(sf::Vector2f(
+                          stof(val_output),
+                          map_objects_array[obj_counter].getMovementLimits().y));
+                        break;
+                      case 1:
+                        map_objects_array[obj_counter].setMovementLimits(sf::Vector2f(
+                          map_objects_array[obj_counter].getMovementLimits().x,
+                          stof(val_output)));
+                        break;
+                    }
+                    movement_counter++;
+                    break;
+                  case 7:
+                    // 2 values
+                    std::cout
+                      << "This is the movement direction: " << val_output
+                      << std::endl;
+                    switch (move_direction_counter)
+                    {
+                      case 0:
+                        map_objects_array[obj_counter].setMoveDirection(sf::Vector2f(
+                          stof(val_output),
+                          map_objects_array[obj_counter].getMoveDirection().y));
+                        break;
+                      case 1:
+                        map_objects_array[obj_counter].setMoveDirection(sf::Vector2f(
+                          map_objects_array[obj_counter].getMoveDirection().x,
+                          stof(val_output)));
+                        break;
+                    }
+                    move_direction_counter++;
+                    break;
+                  case 8:
+                    // 2 values
+                    std::cout << "This is the size: " << val_output
+                              << std::endl;
+                    switch (size_counter)
+                    {
+                      case 0:
+                        map_objects_array[obj_counter].setSize(sf::Vector2f(
+                          stof(val_output),
+                          map_objects_array[obj_counter].getSize().y));
+                        break;
+                      case 1:
+                        map_objects_array[obj_counter].setSize(sf::Vector2f(
+                          map_objects_array[obj_counter].getSize().x,
+                          stof(val_output)));
+                        break;
+                    }
+                    size_counter++;
+                    break;
+                  case 9:
+                    // single value
+                    //std::cout << "This is the type: " << val_output << std::endl;
+                    map_objects_array[obj_counter].setType(val_output);
+                    std::cout << "This is the type: " << map_objects_array[obj_counter].getType() << std::endl;
+                    break;
+                }
               }
-            }
+          }
           obj_output.erase(0, pos_var + var_delimiter.length());
-          var_counter ++;
+          var_counter++;
         }
-      line.erase(0, pos_obj + obj_delimiter.length());
-      obj_counter ++;
+        line.erase(0, pos_obj + obj_delimiter.length());
+        obj_counter++;
+      }
     }
-    //std::cout << enemy_array[0].getMoveDirection().y;
+  }
+  ifs.close();
 }
 
 void Game::buildMap() {
+  player->setKeys(0);
+  air_bar = 800;
+
+  for(int i = 0; i < 6; i++)
+  {
+    if(map_objects_array[i].getType() == "background")
+    {
+      background_block.setFillColor(map_objects_array[i].get);
+    }
+  }
+
+  // init the GATE
+  gate->initSprite(gate->texture,"Data/Images/gate_sprites.png");
+  gate->getSprite()->setTextureRect(sf::IntRect (0,0,16,16));
+  gate->getSprite()->setScale(2.5,2.5);
+  gate->setIsActive(true);
+
+  if(!platform_wall_texture.loadFromFile("Data/Images/cavern_wall.png")) {
+    std::cout << "cavern_room_wall_texture texture did not load\n";
+  }
+  platform_wall_texture.setRepeated(true);
+
+  if(!platform_texture.loadFromFile("Data/Images/cavern_platform.png")) {
+    std::cout << "cavern_floor_texture texture did not load\n";
+  }
+  platform_texture.setRepeated(true);
+
+  if(!elevator_texture_1.loadFromFile("Data/Images/elevator_1.png")) {
+    std::cout << "elevator_texture_1 texture did not load\n";
+  }
+  elevator_texture_1.setRepeated(true);
+
+  // FLOOR
+  platform_array[0].setSize(sf::Vector2f (window.getSize().x-(map_left_wall.getSize().x*2),25));
+  platform_array[0].setPosition(map_left_wall.getSize().x,room_name_bar.getPosition().y-platform_array[0].getGlobalBounds().height);
+  platform_array[0].setFillColor(sf::Color::Magenta);
+  platform_array[0].setTextureRect(sf::IntRect(0, 0, window.getSize().x-(map_left_wall.getSize().x*2), 25));
+  platform_array[0].setTexture(&platform_texture);
+
+  platform_array[1].setSize(sf::Vector2f (100,25));
+  platform_array[1].setPosition(450,platform_array[0].getPosition().y-80);
+  platform_array[1].setFillColor(sf::Color::Magenta);
+  platform_array[1].setTextureRect(sf::IntRect(0, 0, 100, 25));
+  platform_array[1].setTexture(&platform_texture);
+
+  platform_array[2].setSize(sf::Vector2f (200,25));
+  platform_array[2].setPosition(300,platform_array[0].getPosition().y-165);
+  platform_array[2].setFillColor(sf::Color::Magenta);
+  platform_array[2].setTextureRect(sf::IntRect(0, 0, 200, 25));
+  platform_array[2].setTexture(&platform_texture);
+
+  platform_array[3].setSize(sf::Vector2f (40,25));
+  platform_array[3].setPosition(map_left_wall.getPosition().x+map_left_wall.getSize().x,platform_array[0].getPosition().y-230);
+  platform_array[3].setFillColor(sf::Color::Magenta);
+  platform_array[3].setTextureRect(sf::IntRect(0, 0, 40, 25));
+  platform_array[3].setTexture(&platform_texture);
+
+  platform_array[4].setSize(sf::Vector2f (600,25));
+  platform_array[4].setPosition(map_left_wall.getPosition().x+map_left_wall.getSize().x,platform_array[0].getPosition().y-290);
+  platform_array[4].setFillColor(sf::Color::Magenta);
+  platform_array[4].setTextureRect(sf::IntRect(0, 0, 600, 25));
+  platform_array[4].setTexture(&platform_texture);
+
+  platform_array[5].setSize(sf::Vector2f (130,25));
+  platform_array[5].setPosition(667,platform_array[4].getPosition().y+23);
+  platform_array[5].setFillColor(sf::Color::Magenta);
+  platform_array[5].setTextureRect(sf::IntRect(0, 0, 130, 25));
+  platform_array[5].setTexture(&platform_texture);
+
+  platform_array[6].setSize(sf::Vector2f (32,25));
+  platform_array[6].setPosition(763,platform_array[0].getPosition().y-340);
+  platform_array[6].setFillColor(sf::Color::Magenta);
+  platform_array[6].setTextureRect(sf::IntRect(0, 0, 40, 25));
+  platform_array[6].setTexture(&platform_texture);
+
+  //moving
+  platform_array[7].setSize(sf::Vector2f (100,25));
+  platform_array[7].setPosition(60,platform_array[0].getPosition().y-85);
+  platform_array[7].setTextureRect(sf::IntRect(0, 0, 100, 14));
+  platform_array[7].setFillColor(sf::Color::Yellow);
+  platform_array[7].setTexture(&elevator_texture_1);
+
+  platform_array[8].setPosition(0,0);
+  platform_array[9].setPosition(0,0);
+
+  // walls
+  platform_array[11].setSize(sf::Vector2f (25,238));
+  platform_array[11].setPosition(map_right_wall.getPosition().x-25-gate->getSprite()->getGlobalBounds().width,platform_array[0].getPosition().y-gate->getSprite()->getGlobalBounds().height-platform_array[11].getSize().y-2);
+  platform_array[11].setTextureRect(sf::IntRect(0, 0, 25, 238));
+  platform_array[11].setFillColor(sf::Color::White);
+  platform_array[11].setTexture(&platform_wall_texture);
+
+  platform_array[10].setSize(sf::Vector2f (25,223));
+  platform_array[10].setPosition(797,(platform_array[11].getPosition().y+platform_array[11].getGlobalBounds().height)-platform_array[10].getGlobalBounds().height-2);
+  platform_array[10].setTextureRect(sf::IntRect(0, 0, 25, 223));
+  platform_array[10].setFillColor(sf::Color::White);
+  platform_array[10].setTexture(&platform_wall_texture);
+
+  platform_array[12].setSize(sf::Vector2f (350,25));
+  platform_array[12].setPosition(map_right_wall.getPosition().x-platform_array[12].getGlobalBounds().width,platform_array[0].getPosition().y-405);
+  platform_array[12].setTextureRect(sf::IntRect(0, 0, 350, 25));
+  platform_array[12].setFillColor(sf::Color::White);
+  platform_array[12].setTexture(&platform_wall_texture);
+
+  //decay platforms
+  initDecayPlatforms(platform_1, map_the_cold_room, 250, platform_array[0].getPosition().y-60, 5);
+  initDecayPlatforms(platform_2, map_the_cold_room, 600, platform_array[0].getPosition().y-120, 5);
+  initDecayPlatforms(platform_3, map_the_cold_room, platform_array[3].getPosition().x+platform_array[3].getGlobalBounds().width, platform_array[3].getPosition().y, 5);
+  initDecayPlatforms(platform_4, map_the_cold_room, platform_array[11].getPosition().x-48, 457, 2);
+  initDecayPlatforms(platform_5, map_the_cold_room, platform_array[11].getPosition().x-48, 423, 2);
+  initDecayPlatforms(platform_6, map_the_cold_room, platform_array[11].getPosition().x-48, 388, 2);
+  initDecayPlatforms(platform_7, map_the_cold_room, platform_array[11].getPosition().x-48, 352, 2);
+  initDecayPlatforms(platform_8, map_the_cold_room, platform_array[11].getPosition().x-48, 318, 2);
+  initDecayPlatforms(platform_9, map_the_cold_room, platform_array[11].getPosition().x-48, 262, 2);
+  initDecayPlatforms(platform_10, map_the_cold_room, platform_array[5].getPosition().x, platform_array[6].getPosition().y, 4);
+
+  // init the GATE
+  gate->getSprite()->setPosition(map_right_wall.getPosition().x-gate->getSprite()->getGlobalBounds().width,platform_array[0].getPosition().y-gate->getSprite()->getGlobalBounds().height);
+
+  //INIT THE HAZARDS
+  for(int i = 0; i < 10; i++)
+  {
+    hazards_array[i].initSprite(hazards_array[0].texture, "Data/Images/hazard_sprites.png");
+    hazards_array[i].getSprite()->setScale(2.5, 2.5);
+    hazards_array[i].getSprite()->setTextureRect(sf::IntRect(0, 0, 0, 0));
+  }
+  //ICICLES
+  hazards_array[0].getSprite()->setTextureRect(sf::IntRect(24, 0, 8, 8));
+  hazards_array[0].getSprite()->setPosition(map_right_wall.getPosition().x-hazards_array[0].getSprite()->getGlobalBounds().width, platform_array[12].getPosition().y+25);
+  hazards_array[0].getSprite()->setColor(sf::Color::Cyan);
+
+  // INIT THE KEYS
+  for(int i = 0; i < 5; i++) {
+    key_array[i].initSprite(key_array[i].texture,"Data/Images/object_sprites.png");
+    key_array[i].getSprite()->setTextureRect(sf::IntRect (0,8,8,8));
+    key_array[i].getSprite()->setScale(2.5,2.5);
+    key_array[i].setIsActive(true);
+    key_array[i].getSprite()->setColor(sf::Color::Yellow);
+  }
+  key_array[0].getSprite()->setPosition(60,380);
+  key_array[1].getSprite()->setPosition(220,150);
+  key_array[2].getSprite()->setPosition(570,platform_array[1].getPosition().y);
+  key_array[3].getSprite()->setPosition(platform_array[6].getPosition().x,platform_array[12].getPosition().y+25);
+  key_array[4].getSprite()->setPosition(platform_array[10].getPosition().x+25,290);
+
+  // YELLOW ENEMY
+  enemy_array[0].sprite_rect_pos[1][0] = sf::Vector2f(0,10);
+  enemy_array[0].sprite_rect_pos[1][1] = sf::Vector2f(18,10);
+  enemy_array[0].sprite_rect_pos[1][2] = sf::Vector2f(36,10);
+  enemy_array[0].sprite_rect_pos[1][3] = sf::Vector2f(54,10);
+
+  enemy_array[0].sprite_rect_pos[0][0] = sf::Vector2f(64,10);
+  enemy_array[0].sprite_rect_pos[0][1] = sf::Vector2f(82,10);
+  enemy_array[0].sprite_rect_pos[0][2] = sf::Vector2f(100,10);
+  enemy_array[0].sprite_rect_pos[0][3] = sf::Vector2f(118,10);
+
+  enemy_array[1].sprite_rect_pos[1][0] = sf::Vector2f(0,10);
+  enemy_array[1].sprite_rect_pos[1][1] = sf::Vector2f(18,10);
+  enemy_array[1].sprite_rect_pos[1][2] = sf::Vector2f(36,10);
+  enemy_array[1].sprite_rect_pos[1][3] = sf::Vector2f(54,10);
+
+  enemy_array[1].sprite_rect_pos[0][0] = sf::Vector2f(64,10);
+  enemy_array[1].sprite_rect_pos[0][1] = sf::Vector2f(82,10);
+  enemy_array[1].sprite_rect_pos[0][2] = sf::Vector2f(100,10);
+  enemy_array[1].sprite_rect_pos[0][3] = sf::Vector2f(118,10);
+
+  enemy_array[0].initSprite(enemy_array[0].texture,"Data/Images/sprite_sheet.png");
+  enemy_array[0].getSprite()->setTextureRect(sf::IntRect (0,16,10,16));
+  enemy_array[0].getSprite()->setScale(2.5,2.5);
+  enemy_array[0].getSprite()->setPosition(map_right_wall.getPosition().x-enemy_array[0].getSprite()->getGlobalBounds().width,platform_array[0].getPosition().y-enemy_array[0].getSprite()->getGlobalBounds().height);
+  enemy_array[0].setSpeed(50);
+  // USING X AND Y in get movement limits to store the two EXTENTS of movement
+  enemy_array[0].setMovementLimits(sf::Vector2f (380, map_right_wall.getPosition().x));
+  enemy_array[0].setMoveDirection(sf::Vector2f (1,0));
+
+  enemy_array[1].initSprite(enemy_array[0].texture,"Data/Images/sprite_sheet.png");
+  enemy_array[1].getSprite()->setTextureRect(sf::IntRect (0,16,10,16));
+  enemy_array[1].getSprite()->setScale(2.5,2.5);
+  enemy_array[1].getSprite()->setPosition(platform_array[4].getPosition().x,platform_array[4].getPosition().y-enemy_array[0].getSprite()->getGlobalBounds().height);
+  enemy_array[1].setSpeed(50);
+  // USING X AND Y in get movement limits to store the two EXTENTS of movement
+  enemy_array[1].setMovementLimits(sf::Vector2f (platform_array[4].getPosition().x, platform_array[4].getPosition().x+platform_array[4].getGlobalBounds().width));
+  enemy_array[1].setMoveDirection(sf::Vector2f (1,0));
 
 }
 
