@@ -5,7 +5,7 @@
 #include <fstream>
 #include <SFML/Audio.hpp>
 
-//notes
+//notes 2
 
 
 Game::Game(sf::RenderWindow& game_window)
